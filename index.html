@@ -18,11 +18,18 @@
 		<link rel="stylesheet" href="./assets/vendor.e2fbc420.css">
 		<link rel="stylesheet" href="./assets/main.25e74dd0.css">
 		<style>
-			/* Явно задаём белый фон для webview Telegram */
+			/* Явно задаём белый фон для webview Telegram (поверх любых тем) */
 			html,
-			body {
-				background-color: #ffffff;
+			body,
+			#react-app,
+			.page {
+				/* Тест: делаем фон фиолетовым, чтобы проверить отображение в WebApp */
+				background-color: #5b3fd9 !important;
 				min-height: 100%;
+			}
+
+			body {
+				margin: 0;
 			}
 
 			/* Пользовательские анимации полей и иконки пароля (минималистичные) */
